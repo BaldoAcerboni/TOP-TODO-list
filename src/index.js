@@ -1,19 +1,18 @@
-function ListItem(title, description, date, priority, type) {
-  this.title = title;
-  this.description = description;
-  this.date = date;
-  this.priority = priority;
-  this.type = type;
-}
+import * as items from "./modules/loadDOMcrap.js";
 
-const item1 = new ListItem("bubi", "the bubi", "2024-02-01", 1, "work");
-console.log(item1);
+window.addEventListener("load", items.renderContainer());
 
-const item2 = new ListItem(
-  "bobo",
-  "the bobo",
-  "2024-03-03",
-  3,
-  "miscellaneous"
-);
-console.log(item2);
+const today = new Date();
+const todayMs = today.getTime();
+const date = new Date("2024-02-16");
+const dateMs = date.getTime();
+/* date.setFullYear("2024");
+date.setMonth("01");
+date.setDate("1");*/
+console.log((date - today) / 86400000); //  / 86400000
+/* console.log("dateMs", dateMs);
+console.log("todayMs", todayMs); */
+console.log((dateMs - todayMs) / 86400000);
+
+console.log("date", date);
+console.log("today", today);
