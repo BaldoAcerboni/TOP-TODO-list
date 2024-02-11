@@ -47,7 +47,7 @@ const setActiveProject = function (item) {
   item.active = true;
 };
 
-const setInactiveProjects = function (item) {
+const setInactiveProjects = function () {
   for (const el of this.content) {
     el.active = false;
   }
@@ -103,6 +103,10 @@ const setTempId = function (id) {
   this.id = id;
 };
 
+const setFreshComplete = function (complete) {
+  this.complete = complete;
+};
+
 const setComplete = function () {
   this.complete = !this.complete;
 };
@@ -134,7 +138,9 @@ const getItemByDueDate = function () {
   for (const project of this.content) {
     for (const item of project.content) {
       const date = new Date(item.date);
-      const daysRemaining = (date - today) / 86400000;
+      const offset = date.getTimezoneOffset() * 60000;
+      const dateOff = Number(date) + offset;
+      const daysRemaining = (dateOff - today) / 86400000;
       if (daysRemaining > 0 && daysRemaining < 7) {
         arr.push(item);
       }
@@ -162,6 +168,7 @@ Task.prototype.editItem = editItem;
 Task.prototype.delTemp = delTemp;
 Task.prototype.setComplete = setComplete;
 Task.prototype.assignId = assignId;
+Task.prototype.setFreshComplete = setFreshComplete;
 
 /* 
 
@@ -183,6 +190,7 @@ Project.prototype.assignId = assignId;
 Project.prototype.editItem = editItem;
 Project.prototype.getItem = getItem;
 Project.prototype.deleteListItem = deleteListItem;
+Project.prototype.delTemp = delTemp;
 
 /* 
 
@@ -203,6 +211,7 @@ ProjectsArr.prototype.getItem = getItem;
 ProjectsArr.prototype.getProjectByItemId = getProjectByItemId;
 ProjectsArr.prototype.getItemByPriority = getItemByPriority;
 ProjectsArr.prototype.getItemByDueDate = getItemByDueDate;
+ProjectsArr.prototype.deleteListItem = deleteListItem;
 
 /* 
 
@@ -215,40 +224,3 @@ export function TemporaryId(id) {
 }
 TemporaryId.prototype.delTemp = delTemp;
 TemporaryId.prototype.setTempId = setTempId;
-
-export const currentProjectsList = new ProjectsArr();
-
-/* 
-
-  --TESTS--
-
-*/
-
-const work = new Project("Work");
-const misc = new Project("Miscellaneous");
-const work1 = new Task(
-  "titolo",
-  "descrizione di sta cippa sta ceppa e sta ciappa",
-  "2024-02-20",
-  "h"
-);
-const work2 = new Task(
-  "titolo2",
-  "descrizione di sta cippa sta ceppa e sta chiappa",
-  "2024-02-24",
-  "m"
-);
-
-const misc1 = new Task("misc1", "desc1", "2024-03-02", "l");
-const misc2 = new Task("misc2", "desc2", "2024-02-20", "h");
-const misc3 = new Task("misc3", "desc3", "2024-02-12", "m");
-
-currentProjectsList.addNewItem(work);
-currentProjectsList.addNewItem(misc);
-
-work.addNewItem(work1);
-work.addNewItem(work2);
-
-misc.addNewItem(misc1);
-misc.addNewItem(misc2);
-misc.addNewItem(misc3);

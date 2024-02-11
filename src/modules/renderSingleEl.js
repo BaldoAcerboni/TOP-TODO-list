@@ -6,12 +6,6 @@ import editBigSVG from "../images/edit-big.svg";
 import menuSVG from "../images/menu.svg";
 
 import {
-  Task,
-  Project,
-  currentProjectsList,
-  TemporaryId,
-} from "./internalLogic";
-import {
   editTaskModalRender,
   newProjectModalRender,
   editProjectModalRender,
@@ -27,7 +21,9 @@ import {
   changeCompleteOption,
   deactivateAllProjects,
   showGroup,
+  deleteProject,
 } from "./loadDOMcrap";
+import { currentProjectsList } from "./localStorage";
 
 export function renderSidebar() {
   const sidebarRender = document.createElement("div");
@@ -74,10 +70,12 @@ export function renderSidebar() {
 }
 
 function renderProjectUl(list) {
-  whichIsActive(currentProjectsList);
-  for (const project of currentProjectsList.content) {
-    const li = renderSingleProject(project);
-    list.appendChild(li);
+  if (currentProjectsList.content.length > 0) {
+    whichIsActive(currentProjectsList);
+    for (const project of currentProjectsList.content) {
+      const li = renderSingleProject(project);
+      list.appendChild(li);
+    }
   }
 }
 
@@ -109,22 +107,23 @@ function renderDynamicUl(ul) {
     e.addEventListener("click", deactivateAllProjects);
     e.addEventListener("click", showGroup);
   });
-
-  /* const priorityGroup = document.getElementsByClassName("priority-group");
-  console.log(priorityGroup);
-  Array.from(priorityGroup).forEach((e) => {}); */
 }
 
 export function renderSingleProject(project) {
   const li = document.createElement("li");
+  const deleteBtn = new Image();
 
   li.textContent = `${project.title}`;
+  deleteBtn.src = deleteSVG;
+  deleteBtn.className = "delete-project";
 
   if (!project.id) {
     currentProjectsList.checkDuplicateProject(project);
   }
   li.id = project.id;
+  li.appendChild(deleteBtn);
 
+  deleteBtn.addEventListener("click", deleteProject);
   li.addEventListener("click", changeActiveProject);
 
   if (project.active) {
@@ -185,7 +184,10 @@ export function renderTopContent(projectTitle) {
   newTopSection.appendChild(editProjectImg);
 
   showImg.addEventListener("click", showSidebar);
-  editProjectImg.addEventListener("click", editProjectModalRender);
+  if (currentProjectsList.content.length > 0) {
+    editProjectImg.addEventListener("click", editProjectModalRender);
+  }
+
   return newTopSection;
 }
 

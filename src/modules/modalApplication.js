@@ -1,12 +1,8 @@
 import { whichIsActive, itemEdited, showGroup } from "./loadDOMcrap";
 import { renderSingleProject, renderTopContent } from "./renderSingleEl";
-import {
-  Task,
-  Project,
-  currentProjectsList,
-  TemporaryId,
-} from "./internalLogic";
+import { Task, Project } from "./constructors";
 import { renderSingleTask } from "./renderSingleEl";
+import { currentProjectsList, updateLocalStorage } from "./localStorage";
 
 export function confirmNewTask() {
   const main = document.getElementById("main");
@@ -30,6 +26,7 @@ export function confirmNewTask() {
   const taskDOM = renderSingleTask(newTask);
   main.appendChild(taskDOM);
   form.remove();
+  updateLocalStorage();
 }
 
 export function confirmEditTask() {
@@ -39,7 +36,7 @@ export function confirmEditTask() {
   const description = document.getElementById("description-input").value;
   const date = document.getElementById("date-input").value;
   const priorities = document.getElementsByName("priority");
-  const activeProject = currentProjectsList.getProjectByItemId(itemEdited.id); //whichIsActive(currentProjectsList);
+  const activeProject = currentProjectsList.getProjectByItemId(itemEdited.id);
   const dynamicGroupUl = document.getElementById("dynamic-ul");
   const task = activeProject.getItem(itemEdited.id);
   const DOMItem = document.getElementById(itemEdited.id);
@@ -72,6 +69,7 @@ export function confirmEditTask() {
   }
 
   form.remove();
+  updateLocalStorage();
   itemEdited.setTempId("");
 }
 
@@ -87,6 +85,7 @@ export function confirmNewProject() {
   projectUL.appendChild(li);
 
   form.remove();
+  updateLocalStorage();
 }
 
 export function confirmEditProject() {
@@ -95,17 +94,22 @@ export function confirmEditProject() {
   const projectUL = document.getElementById("projects-ul");
   const form = document.getElementById("project-modal");
   const title = document.getElementById("project-name").value;
-  const project = currentProjectsList.getItem(itemEdited.id); //whichIsActive(currentProjectsList);
+  const project = currentProjectsList.getItem(itemEdited.id);
+  const DOMItem = document.getElementById(itemEdited.id);
 
   project.editItem(title);
-
-  Array.from(projectUL.children).forEach((e) => {
-    if (e.id === project.id) {
-      e.textContent = project.title;
+  let pos;
+  Array.from(projectUL.childNodes).forEach((e) => {
+    if (e.id === DOMItem.id) {
+      pos = Array.from(projectUL.childNodes).indexOf(DOMItem);
     }
   });
+  DOMItem.remove();
+
+  projectUL.insertBefore(renderSingleProject(project), projectUL.children[pos]);
 
   form.remove();
   lateTopContent.remove();
+  updateLocalStorage();
   main.appendChild(renderTopContent(whichIsActive(currentProjectsList).title));
 }

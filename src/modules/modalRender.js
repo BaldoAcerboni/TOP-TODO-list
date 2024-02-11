@@ -1,20 +1,23 @@
 import { itemEdited, whichIsActive } from "./loadDOMcrap";
 import { removeIrrelevantEventListeners } from "./eventListenersManager";
-import { validateNewModal, validateEditModal } from "./modalValidation";
 import {
-  Task,
-  Project,
-  currentProjectsList,
-  TemporaryId,
-} from "./internalLogic";
+  validateNewModal,
+  validateEditModal,
+  cancelNewForm,
+  cancelEditForm,
+} from "./modalValidation";
+import { currentProjectsList } from "./localStorage";
 
 export function newTaskModalRender() {
   const elList = newTaskModalCreateElements();
   const formToRender = newTaskRenderLoops(elList);
 
   container.appendChild(formToRender);
-  removeIrrelevantEventListeners();
 
+  const cancelBtn = document.getElementById("cancel-item");
+
+  removeIrrelevantEventListeners();
+  cancelBtn.addEventListener("click", cancelNewForm);
   formToRender.addEventListener("submit", validateNewModal);
 }
 
@@ -23,7 +26,8 @@ export function editTaskModalRender(e) {
 
   const activeProject = currentProjectsList.getProjectByItemId(
     e.target.parentNode.id
-  ); //whichIsActive(currentProjectsList);
+  );
+
   const taskToEdit = activeProject.getItem(id);
   const elList = newTaskModalCreateElements();
   const formToRender = newTaskRenderLoops(elList);
@@ -36,6 +40,7 @@ export function editTaskModalRender(e) {
   const highPRadio = document.getElementById("high-priority");
   const mediumPRadio = document.getElementById("medium-priority");
   const lowPRadio = document.getElementById("low-priority");
+  const cancelBtn = document.getElementById("cancel-item");
 
   titleInput.value = taskToEdit.title;
   descriptionInput.value = taskToEdit.description;
@@ -54,9 +59,8 @@ export function editTaskModalRender(e) {
   }
 
   removeIrrelevantEventListeners();
-
   itemEdited.setTempId(id);
-
+  cancelBtn.addEventListener("click", cancelEditForm);
   formToRender.addEventListener("submit", validateEditModal);
 }
 
@@ -85,6 +89,7 @@ function newTaskModalCreateElements() {
   const lpRadioInput = document.createElement("input");
 
   const confirmBtn = document.createElement("button");
+  const cancelBtn = document.createElement("button");
 
   //ATTRIBUTES
   form.id = "item-modal";
@@ -134,6 +139,10 @@ function newTaskModalCreateElements() {
   confirmBtn.id = "confirm-item";
   confirmBtn.setAttribute("type", "submit");
 
+  cancelBtn.textContent = "CANCEL";
+  cancelBtn.id = "cancel-item";
+  cancelBtn.setAttribute("type", "button");
+
   return {
     form,
     h2,
@@ -151,6 +160,7 @@ function newTaskModalCreateElements() {
     lpRadioLabel,
     lpRadioInput,
     confirmBtn,
+    cancelBtn,
   };
 }
 
@@ -203,6 +213,7 @@ function newTaskRenderLoops(list) {
         break;
       case 5:
         div.appendChild(list.confirmBtn);
+        div.appendChild(list.cancelBtn);
         break;
     }
     list.form.appendChild(div);
@@ -217,7 +228,10 @@ export function projectModalCreateElement() {
   form.innerHTML = `
     <label for="project-name">Project name:</label>
     <input type="text" id="project-name" maxlength="15" required />
-    <button type="submit" id="confirm-project">CONFIRM</button>`;
+    <div>
+      <button type="submit" id="confirm-project">CONFIRM</button>
+      <button type="button" id="cancel-project">CANCEL</button>
+    </div>`;
 
   //center element without knowing its width(pos: absolute & left: 50%)
   form.style.marginLeft = `-${form.offsetWidth / 2}px`;
@@ -230,8 +244,10 @@ export function newProjectModalRender() {
 
   container.appendChild(form);
 
-  removeIrrelevantEventListeners();
+  const cancelBtn = document.getElementById("cancel-project");
 
+  removeIrrelevantEventListeners();
+  cancelBtn.addEventListener("click", cancelNewForm);
   form.addEventListener("submit", validateNewModal);
 }
 
@@ -242,11 +258,12 @@ export function editProjectModalRender() {
   container.appendChild(form);
 
   const title = document.getElementById("project-name");
+  const cancelBtn = document.getElementById("cancel-project");
 
   itemEdited.setTempId(project.id);
   title.value = project.title;
 
   removeIrrelevantEventListeners();
-
+  cancelBtn.addEventListener("click", cancelEditForm);
   form.addEventListener("submit", validateEditModal);
 }
